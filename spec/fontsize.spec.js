@@ -41,6 +41,8 @@ describe('Font Size Button TestCase', function () {
             expect(editor.toolbar.getToolbarActionsElement().style.display).toBe('none');
             expect(fontSizeExtension.isDisplayed()).toBe(true);
             expect(fontSizeExtension.showForm).toHaveBeenCalled();
+
+            editor.destroy();
         });
     });
 
@@ -48,6 +50,7 @@ describe('Font Size Button TestCase', function () {
         it('should change font size when slider is moved', function () {
             spyOn(MediumEditor.prototype, 'fontSize').and.callThrough();
             var editor = new MediumEditor('.editor', this.mediumOpts),
+                fontSizeExtension = editor.getExtensionByName('fontsize'),
                 button,
                 input;
 
@@ -55,14 +58,17 @@ describe('Font Size Button TestCase', function () {
             button = editor.toolbar.getToolbarElement().querySelector('[data-action="fontSize"]');
             fireEvent(button, 'click');
 
-            input = editor.getExtensionByName('fontsize').getInput();
+            input = fontSizeExtension.getInput();
             input.value = '7';
             selectElementContents(this.el);
             fireEvent(input, 'change');
 
             expect(editor.fontSize).toHaveBeenCalled();
+
+            fireEvent(fontSizeExtension.getForm().querySelector('a.medium-editor-toobar-save'), 'click');
             testFontSizeContents(this.el, '7');
         });
+
         it('should revert font size when slider value is set to 4', function () {
             spyOn(MediumEditor.prototype, 'fontSize').and.callThrough();
             spyOn(MediumEditor.statics.FontSizeExtension.prototype, 'clearFontSize').and.callThrough();
@@ -86,6 +92,8 @@ describe('Font Size Button TestCase', function () {
             input.value = '4';
             selectElementContents(editor.elements[0]);
             fireEvent(input, 'change');
+
+            fireEvent(fontSizeExtension.getForm().querySelector('a.medium-editor-toobar-save'), 'click');
             testFontSizeContents(this.el, null); // TODO: remove the <font> element entirely instead of just the `size` attribute
             expect(fontSizeExtension.clearFontSize).toHaveBeenCalled();
         });
@@ -114,6 +122,20 @@ describe('Font Size Button TestCase', function () {
             expect(input.value).toBe('4');
             expect(editor.toolbar.showAndUpdateToolbar).toHaveBeenCalled();
             expect(fontSizeExtension.isDisplayed()).toBe(false);
+        });
+    });
+
+    describe('Destroying MediumEditor', function () {
+        it('should deactivate the font size extension and remove the form', function () {
+            spyOn(MediumEditor.statics.FontSizeExtension.prototype, 'deactivate').and.callThrough();
+            var editor = new MediumEditor('.editor', this.mediumOpts),
+                fontSizeExtension = editor.getExtensionByName('fontsize');
+
+            expect(document.getElementById('medium-editor-toolbar-form-fontsize-1')).toBeTruthy();
+            editor.destroy();
+
+            expect(fontSizeExtension.deactivate).toHaveBeenCalled();
+            expect(document.getElementById('medium-editor-toolbar-form-fontsize-1')).not.toBeTruthy();
         });
     });
 });
