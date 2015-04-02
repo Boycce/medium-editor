@@ -529,7 +529,7 @@ var Toolbar;
             // position the toolbar at left 0, so we can get the real width of the toolbar
             this.getToolbarElement().style.left = '0';
 
-            var windowWidth = this.options.contentWindow.innerWidth,
+            var windowWidth = this.options.contentWindow.innerWidth - 19,
                 range = selection.getRangeAt(0),
                 boundary = range.getBoundingClientRect(),
                 middleBoundary = (boundary.left + boundary.right) / 2,
